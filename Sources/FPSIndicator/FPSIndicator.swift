@@ -99,14 +99,15 @@ class FPSIndicatorViewController: UIViewController {
         view.backgroundColor = .clear
 
         navigationController?.navigationBar.isUserInteractionEnabled = false
+
         let barAppearance = UINavigationBarAppearance()
         barAppearance.configureWithTransparentBackground()
         navigationItem.standardAppearance = barAppearance
         navigationItem.compactAppearance = barAppearance
         navigationItem.scrollEdgeAppearance = barAppearance
-        if #available(iOS 15.0, *) {
-            navigationItem.compactScrollEdgeAppearance = barAppearance
-        }
+
+        // may still needs fallback
+        navigationController?.navigationBar.alpha = 0
 
         configureIndicatorLabel(fps: 999.999)
 

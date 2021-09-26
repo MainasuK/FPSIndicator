@@ -127,7 +127,12 @@ class FPSIndicatorViewController: UIViewController {
             target: self,
             selector: #selector(FPSIndicatorViewController.step(displayLink:))
         )
-        displayLink.add(to: RunLoop.main, forMode: .common)
+        if #available(iOS 15.0, *) {
+            displayLink.preferredFrameRateRange = .init(minimum: 15, maximum: 120, preferred: 120)
+        } else {
+            // Fallback on earlier versions
+        }
+        displayLink.add(to: .current, forMode: .common)
     }
 
     private func configureIndicatorLabel(fps: Double) {
@@ -207,6 +212,7 @@ class FPSIndicatorViewController: UIViewController {
         defer { count = 0 }
 
         let fps = Double(count) / duration
+        
         configureIndicatorLabel(fps: fps)
     }
 

@@ -8,7 +8,7 @@
 <img src="./Press/screenshot.png" alt="demo">
 
 ## Features
-- [x] Display FPS (up to 999)
+- [x] Display FPS (up to 120Hz)
 - [x] Drag to move
 - [x] Customize appearance
 - [x] Support Swift package manager 
@@ -16,6 +16,10 @@
 ## Requirements
 
 - iOS 14.0+
+
+
+## Note
+Please check [Optimizing ProMotion Refresh Rates for iPhone 13 Pro and iPad Pro](https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro) to adapt high refresh rate.
 
 ## Usage example
 

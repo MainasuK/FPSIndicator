@@ -7,12 +7,14 @@
 
 import UIKit
 import Combine
+import FPSIndicator
 
 class ViewController: UITableViewController {
 
     var dataSource: UITableViewDiffableDataSource<String, String>!
 
     let sleepToggleBarButtonItem = UIBarButtonItem()
+    let tickToggleBarButtonItem = UIBarButtonItem()
 
     var disposeBag = Set<AnyCancellable>()
     let needSleep = CurrentValueSubject<Bool, Never>(true)
@@ -24,9 +26,14 @@ class ViewController: UITableViewController {
         title = "FPS Indicator"
         view.backgroundColor = .systemBackground
 
+        navigationItem.leftBarButtonItem = tickToggleBarButtonItem
+        tickToggleBarButtonItem.target = self
+        tickToggleBarButtonItem.action = #selector(ViewController.tickToggleBarButtonItemDidPressed(_:))
+        updateTickButton()
+
         navigationItem.rightBarButtonItem = sleepToggleBarButtonItem
         sleepToggleBarButtonItem.target = self
-        sleepToggleBarButtonItem.action = #selector(ViewController.sleepToggleBarButtonItemDisPressed(_:))
+        sleepToggleBarButtonItem.action = #selector(ViewController.sleepToggleBarButtonItemDidPressed(_:))
         
         needSleep
             .receive(on: DispatchQueue.main)
@@ -59,7 +66,20 @@ class ViewController: UITableViewController {
         dataSource.apply(snapshot)
     }
 
-    @objc private func sleepToggleBarButtonItemDisPressed(_ sender: UIBarButtonItem) {
+    private func updateTickButton() {
+        let isOn = FPSIndicator.geigerCounterEnabled
+        let imageName = isOn ? "speaker.wave.3.fill" : "speaker.slash"
+        tickToggleBarButtonItem.image = UIImage(systemName: imageName)
+        tickToggleBarButtonItem.tintColor = isOn ? .systemYellow : .label
+    }
+
+    @objc private func tickToggleBarButtonItemDidPressed(_ sender: UIBarButtonItem) {
+        FPSIndicator.geigerCounterEnabled.toggle()
+        updateTickButton()
+        tableView.reloadData()
+    }
+
+    @objc private func sleepToggleBarButtonItemDidPressed(_ sender: UIBarButtonItem) {
         needSleep.value.toggle()
         tableView.reloadData()
     }

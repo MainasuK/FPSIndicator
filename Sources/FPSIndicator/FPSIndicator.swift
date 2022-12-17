@@ -1,4 +1,5 @@
 import UIKit
+import AudioToolbox
 
 class FPSWindow: UIWindow {
 
@@ -49,6 +50,7 @@ public class FPSIndicator {
     public static var fpsTextColor: (Double) -> UIColor = { fps in
         return .label
     }
+    public static var geigerCounterEnabled = false
 
     let window: FPSWindow
 
@@ -74,6 +76,7 @@ class FPSIndicatorViewController: UIViewController {
     }()
 
     var displayLink: CADisplayLink!
+    var tickSoundID: SystemSoundID!
 
     static let fpsNumberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
@@ -89,12 +92,14 @@ class FPSIndicatorViewController: UIViewController {
 
     private var count: Int = 0
     private var lastTimestamp: TimeInterval?
-
+    private var targetTimestamp: TimeInterval?
+    private var minFrameDuration = 1 / CGFloat(UIScreen.main.maximumFramesPerSecond)
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         createDisplayLink()
+        createTickSound()
 
         view.backgroundColor = .clear
 
@@ -133,6 +138,26 @@ class FPSIndicatorViewController: UIViewController {
             // Fallback on earlier versions
         }
         displayLink.add(to: .current, forMode: .common)
+    }
+
+    private func createTickSound() {
+        guard let url = Bundle.module.url(forResource: "tick", withExtension: "aiff") else {
+            return
+        }
+        var id = SystemSoundID()
+        let err = AudioServicesCreateSystemSoundID(url as CFURL, &id)
+        guard err == noErr else {
+            print("Error setting up system sound: \(err)")
+            return
+        }
+        self.tickSoundID = id
+    }
+
+    deinit {
+        if let tickSoundID {
+            AudioServicesDisposeSystemSoundID(tickSoundID)
+            self.tickSoundID = nil
+        }
     }
 
     private func configureIndicatorLabel(fps: Double) {
@@ -207,11 +232,20 @@ class FPSIndicatorViewController: UIViewController {
         count += 1
 
         let duration = displayLink.timestamp - lastTimestamp
+
+        if let targetTimestamp, let tickSoundID,
+           FPSIndicator.geigerCounterEnabled,
+           displayLink.timestamp - targetTimestamp > minFrameDuration {
+            AudioServicesPlaySystemSound(tickSoundID)
+        }
+        targetTimestamp = displayLink.targetTimestamp
+
         guard duration >= 1.0 else { return }
         self.lastTimestamp = displayLink.timestamp
         defer { count = 0 }
 
         let fps = Double(count) / duration
+        minFrameDuration = 1 / CGFloat((view.window?.screen ?? .main).maximumFramesPerSecond)
         
         configureIndicatorLabel(fps: fps)
     }

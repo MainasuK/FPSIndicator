@@ -21,7 +21,8 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "FPSIndicator",
-            dependencies: []),
+            dependencies: [],
+            resources: [.copy("tick.aiff")]),
         .testTarget(
             name: "FPSIndicatorTests",
             dependencies: ["FPSIndicator"]),

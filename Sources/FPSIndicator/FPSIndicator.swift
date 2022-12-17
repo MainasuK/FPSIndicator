@@ -30,23 +30,23 @@ class FPSWindow: UIWindow {
 
 public class FPSIndicator {
 
-    static var screenMargin = UIEdgeInsets(top: 44, left: 8, bottom: 44, right: 8)
-    static var backgroundColor: UIColor = .secondarySystemBackground
+    public static var screenMargin = UIEdgeInsets(top: 44, left: 8, bottom: 44, right: 8)
+    public static var backgroundColor: UIColor = .secondarySystemBackground
     /// attributes for "999" in 999.9FPS
-    static var fpsNumberAttributes: [NSAttributedString.Key: Any] = [
+    public static var fpsNumberAttributes: [NSAttributedString.Key: Any] = [
         .font: UIFont.monospacedSystemFont(ofSize: 15, weight: .regular)
     ]
     /// attributes for "FPS" in 999.9FPS
-    static var fpsTextAttributes: [NSAttributedString.Key: Any] = [
+    public static var fpsTextAttributes: [NSAttributedString.Key: Any] = [
         .font: UIFont.monospacedSystemFont(ofSize: 11, weight: .regular)
     ]
-    static var fpsNumberColor: (Double) -> UIColor = { fps in
+    public static var fpsNumberColor: (Double) -> UIColor = { fps in
         if fps >= 55 { return .systemGreen}
         if fps >= 50 { return .systemTeal }
         if fps >= 40 { return .systemYellow }
         return .systemRed
     }
-    static var fpsTextColor: (Double) -> UIColor = { fps in
+    public static var fpsTextColor: (Double) -> UIColor = { fps in
         return .label
     }
 

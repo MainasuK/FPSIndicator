@@ -11,6 +11,7 @@
 - [x] Display FPS (up to 120Hz)
 - [x] Drag to move
 - [x] Customize appearance
+- [x] Optional [“geiger counter”](https://github.com/kconner/KMCGeigerCounter) functionality that reports dropped frames as an audible click 
 - [x] Support Swift package manager 
 
 ## Requirements
@@ -55,6 +56,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 ## Acknowledgements
 
 - [YYText](https://github.com/ibireme/YYText/blob/master/Demo/YYTextDemo/YYFPSLabel.m)
+- [KMCGeigerCounter](https://github.com/kconner/KMCGeigerCounter)
 
 ## Meta
 

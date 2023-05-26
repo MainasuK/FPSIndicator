@@ -24,7 +24,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = UINavigationController(rootViewController: ViewController())
         window?.makeKeyAndVisible()
 
+        #if DEBUG
         fpsIndicator = FPSIndicator(windowScene: windowScene)
+        
+        // customise in view controller
+        // FPSIndicator.geigerCounterEnabled = true
+        // FPSIndicator.geigerEnableWhenFrameDropBeyond = 15
+        #endif
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

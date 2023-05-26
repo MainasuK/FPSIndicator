@@ -42,7 +42,7 @@ public class FPSIndicator {
         .font: UIFont.monospacedSystemFont(ofSize: 11, weight: .regular)
     ]
     public static var fpsNumberColor: (Double) -> UIColor = { fps in
-        if fps >= 55 { return .systemGreen}
+        if fps >= 55 { return .systemGreen }
         if fps >= 50 { return .systemTeal }
         if fps >= 40 { return .systemYellow }
         return .systemRed
@@ -51,6 +51,7 @@ public class FPSIndicator {
         return .label
     }
     public static var geigerCounterEnabled = false
+    public static var geigerEnableWhenFrameDropBeyond: CGFloat = 10
 
     let window: FPSWindow
 
@@ -233,21 +234,24 @@ class FPSIndicatorViewController: UIViewController {
 
         let duration = displayLink.timestamp - lastTimestamp
 
-        if let targetTimestamp, let tickSoundID,
-           FPSIndicator.geigerCounterEnabled,
-           displayLink.timestamp - targetTimestamp > minFrameDuration {
-            AudioServicesPlaySystemSound(tickSoundID)
-        }
-        targetTimestamp = displayLink.targetTimestamp
-
         guard duration >= 1.0 else { return }
         self.lastTimestamp = displayLink.timestamp
         defer { count = 0 }
 
         let fps = Double(count) / duration
+        let maximumFramesPerSecond = CGFloat((view.window?.screen ?? .main).maximumFramesPerSecond)
         minFrameDuration = 1 / CGFloat((view.window?.screen ?? .main).maximumFramesPerSecond)
         
+        targetTimestamp = displayLink.targetTimestamp
+        
         configureIndicatorLabel(fps: fps)
+        
+        // tick the sould for frame drop
+        if FPSIndicator.geigerCounterEnabled, let tickSoundID,
+           fps < maximumFramesPerSecond - max(1, FPSIndicator.geigerEnableWhenFrameDropBeyond)
+        {
+            AudioServicesPlaySystemSound(tickSoundID)
+        }
     }
 
 }

@@ -46,9 +46,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = UINavigationController(rootViewController: ViewController())
         window?.makeKeyAndVisible()
 
-		  #if DEBUG
+        #if DEBUG
         fpsIndicator = FPSIndicator(windowScene: windowScene)
+        FPSIndicator.geigerCounterEnabled = true            // optional
+        FPSIndicator.geigerEnableWhenFrameDropBeyond = 20   // tick when frame drop more then 20FPS (a.k.a under 40FPS in 60FPS device)
         #endif
+        
+        // Note:
+        // The FPSIndicator will create a overlay transparent window
+        // which may break your status bar apperance by accident.
     }
 }
 ```

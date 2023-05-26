@@ -1,4 +1,5 @@
 import UIKit
+import AudioToolbox
 
 class FPSWindow: UIWindow {
 
@@ -30,25 +31,27 @@ class FPSWindow: UIWindow {
 
 public class FPSIndicator {
 
-    static var screenMargin = UIEdgeInsets(top: 44, left: 8, bottom: 44, right: 8)
-    static var backgroundColor: UIColor = .secondarySystemBackground
+    public static var screenMargin = UIEdgeInsets(top: 44, left: 8, bottom: 44, right: 8)
+    public static var backgroundColor: UIColor = .secondarySystemBackground
     /// attributes for "999" in 999.9FPS
-    static var fpsNumberAttributes: [NSAttributedString.Key: Any] = [
+    public static var fpsNumberAttributes: [NSAttributedString.Key: Any] = [
         .font: UIFont.monospacedSystemFont(ofSize: 15, weight: .regular)
     ]
     /// attributes for "FPS" in 999.9FPS
-    static var fpsTextAttributes: [NSAttributedString.Key: Any] = [
+    public static var fpsTextAttributes: [NSAttributedString.Key: Any] = [
         .font: UIFont.monospacedSystemFont(ofSize: 11, weight: .regular)
     ]
-    static var fpsNumberColor: (Double) -> UIColor = { fps in
-        if fps >= 55 { return .systemGreen}
+    public static var fpsNumberColor: (Double) -> UIColor = { fps in
+        if fps >= 55 { return .systemGreen }
         if fps >= 50 { return .systemTeal }
         if fps >= 40 { return .systemYellow }
         return .systemRed
     }
-    static var fpsTextColor: (Double) -> UIColor = { fps in
+    public static var fpsTextColor: (Double) -> UIColor = { fps in
         return .label
     }
+    public static var geigerCounterEnabled = false
+    public static var geigerEnableWhenFrameDropBeyond: CGFloat = 10
 
     let window: FPSWindow
 
@@ -74,6 +77,7 @@ class FPSIndicatorViewController: UIViewController {
     }()
 
     var displayLink: CADisplayLink!
+    var tickSoundID: SystemSoundID!
 
     static let fpsNumberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
@@ -89,12 +93,14 @@ class FPSIndicatorViewController: UIViewController {
 
     private var count: Int = 0
     private var lastTimestamp: TimeInterval?
-
+    private var targetTimestamp: TimeInterval?
+    private var minFrameDuration = 1 / CGFloat(UIScreen.main.maximumFramesPerSecond)
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         createDisplayLink()
+        createTickSound()
 
         view.backgroundColor = .clear
 
@@ -133,6 +139,26 @@ class FPSIndicatorViewController: UIViewController {
             // Fallback on earlier versions
         }
         displayLink.add(to: .current, forMode: .common)
+    }
+
+    private func createTickSound() {
+        guard let url = Bundle.module.url(forResource: "tick", withExtension: "aiff") else {
+            return
+        }
+        var id = SystemSoundID()
+        let err = AudioServicesCreateSystemSoundID(url as CFURL, &id)
+        guard err == noErr else {
+            print("Error setting up system sound: \(err)")
+            return
+        }
+        self.tickSoundID = id
+    }
+
+    deinit {
+        if let tickSoundID {
+            AudioServicesDisposeSystemSoundID(tickSoundID)
+            self.tickSoundID = nil
+        }
     }
 
     private func configureIndicatorLabel(fps: Double) {
@@ -207,13 +233,25 @@ class FPSIndicatorViewController: UIViewController {
         count += 1
 
         let duration = displayLink.timestamp - lastTimestamp
+
         guard duration >= 1.0 else { return }
         self.lastTimestamp = displayLink.timestamp
         defer { count = 0 }
 
         let fps = Double(count) / duration
+        let maximumFramesPerSecond = CGFloat((view.window?.screen ?? .main).maximumFramesPerSecond)
+        minFrameDuration = 1 / CGFloat((view.window?.screen ?? .main).maximumFramesPerSecond)
+        
+        targetTimestamp = displayLink.targetTimestamp
         
         configureIndicatorLabel(fps: fps)
+        
+        // tick the sould for frame drop
+        if FPSIndicator.geigerCounterEnabled, let tickSoundID,
+           fps < maximumFramesPerSecond - max(1, FPSIndicator.geigerEnableWhenFrameDropBeyond)
+        {
+            AudioServicesPlaySystemSound(tickSoundID)
+        }
     }
 
 }

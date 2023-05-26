@@ -11,6 +11,7 @@
 - [x] Display FPS (up to 120Hz)
 - [x] Drag to move
 - [x] Customize appearance
+- [x] Optional [“geiger counter”](https://github.com/kconner/KMCGeigerCounter) functionality that reports dropped frames as an audible click 
 - [x] Support Swift package manager 
 
 ## Requirements
@@ -45,9 +46,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = UINavigationController(rootViewController: ViewController())
         window?.makeKeyAndVisible()
 
-		  #if DEBUG
+        #if DEBUG
         fpsIndicator = FPSIndicator(windowScene: windowScene)
+        FPSIndicator.geigerCounterEnabled = true            // optional
+        FPSIndicator.geigerEnableWhenFrameDropBeyond = 20   // tick when frame drop more then 20FPS (a.k.a under 40FPS in 60FPS device)
         #endif
+        
+        // Note:
+        // The FPSIndicator will create a overlay transparent window
+        // which may break your status bar apperance by accident.
     }
 }
 ```
@@ -55,6 +62,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 ## Acknowledgements
 
 - [YYText](https://github.com/ibireme/YYText/blob/master/Demo/YYTextDemo/YYFPSLabel.m)
+- [KMCGeigerCounter](https://github.com/kconner/KMCGeigerCounter)
 
 ## Meta
 

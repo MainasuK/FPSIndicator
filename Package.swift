@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.6
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -22,9 +22,19 @@ let package = Package(
         .target(
             name: "FPSIndicator",
             dependencies: [],
-            resources: [.copy("tick.aiff")]),
+            resources: [
+                .copy("tick.aiff"),
+                .copy("__GeneratedBuildRecord.stub")
+            ],
+            plugins: ["BuildRecorder"]),
         .testTarget(
             name: "FPSIndicatorTests",
             dependencies: ["FPSIndicator"]),
+        .executableTarget(
+            name: "BuildRecorderExec"),
+        .plugin(
+            name: "BuildRecorder",
+            capability: .buildTool(),
+            dependencies: ["BuildRecorderExec"])
     ]
 )

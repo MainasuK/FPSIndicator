@@ -26,7 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         #if DEBUG
         fpsIndicator = FPSIndicator(windowScene: windowScene)
-        
+        print(BuildRecord.timestamp)
         // customise in view controller
         // FPSIndicator.geigerCounterEnabled = true
         // FPSIndicator.geigerEnableWhenFrameDropBeyond = 15
